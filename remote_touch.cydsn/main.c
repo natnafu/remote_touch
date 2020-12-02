@@ -34,7 +34,7 @@ int main(void)
     // Copper temperature sensor
     ADC_TEMP_Start();
     ADC_TEMP_StartConvert();
-    float temp_copper;
+    float temp_copper = 0;
 
     // Serial debugging
     UART_PC_Start();
@@ -48,7 +48,7 @@ int main(void)
 
         // Print out temperatures
         char buf[64];
-        sprintf(buf, "RTD %i\n", (int) temp_copper);
+        sprintf(buf, "RTD %.2f\n", temp_copper);
         UART_PC_PutString(buf);
     }
 }
