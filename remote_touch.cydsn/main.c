@@ -81,6 +81,7 @@ int main(void)
             CapSense_CSD_UpdateEnabledBaselines();
             CapSense_CSD_ScanEnabledWidgets();
             is_touched = CapSense_CSD_CheckIsWidgetActive(CapSense_CSD_TOUCH0__BTN);
+            PIN_GPIO_Write(is_touched);
         }
 
         if (is_touched) heater_controller(temp_copper);
