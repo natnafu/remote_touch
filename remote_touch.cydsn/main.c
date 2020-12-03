@@ -35,7 +35,8 @@ uint32_t timer_cooling = MAX_COOLING_TIME_MS;
 #define R_TOP       1000.0    // RTD, 1kOhm at 0C
 #define R_BOT       10000.0   // descrete resistor
 #define OHM_PER_C   3.85      // RTD ohms per degree C
-#define RTD_OFFSET  47.0
+//#define RTD_OFFSET  47.0      // Frame 1
+#define RTD_OFFSET  32.0      // Frame 2
 
 // Convert RTD voltage to temp (units C)
 float rtd_volt_to_temp(float voltage) {
@@ -43,7 +44,8 @@ float rtd_volt_to_temp(float voltage) {
 }
 
 // Heater controller
-#define TARGET_TEMP         34   // selected empirically
+//#define TARGET_TEMP         34   // selected empirically, Frame 1
+#define TARGET_TEMP         30   // selected empirically, Frame 1
 #define MIN_HEATER_DUTY     147  // takes ~5min before it's "too hot"
 
 // Fast heat up and then keep steady
