@@ -57,8 +57,15 @@ int main(void)
     // Serial debugging
     UART_PC_Start();
 
+    // Initialize Touch Sensor
+    CyDelay(2000);
+    CapSense_CSD_Start();
+    CapSense_CSD_InitializeAllBaselines();
+    uint8_t is_touched = 0;
+
     for(;;) {
 
+        // Read RTD temp
         if (ADC_TEMP_IsEndConversion(ADC_TEMP_RETURN_STATUS)) {
             uint32_t adc_RTD0 = ADC_TEMP_GetResult32();
             temp_copper = rtd_volt_to_temp(ADC_TEMP_CountsTo_Volts(adc_RTD0));
@@ -68,7 +75,16 @@ int main(void)
         char buf[64];
         sprintf(buf, "RTD %.2f\n", temp_copper);
         UART_PC_PutString(buf);
-        CyDelay(500);
+
+        // Read touch sensor
+        if(0u == CapSense_CSD_IsBusy()) {
+            CapSense_CSD_UpdateEnabledBaselines();
+            CapSense_CSD_ScanEnabledWidgets();
+            is_touched = CapSense_CSD_CheckIsWidgetActive(CapSense_CSD_TOUCH0__BTN);
+        }
+
+        if (is_touched) heater_controller(temp_copper);
+        else PWM_HEATER_WriteCompare(0);
     }
 }
 
