@@ -13,6 +13,23 @@
 
 #include "project.h"
 
+// Get current Timer count
+uint32_t stopwatch_start(void) {
+    return Timer_ReadCounter();
+}
+
+// Returns elapsed time since count (assumes 1kHz count clock)
+uint32_t stopwatch_elapsed_ms(uint32_t timer_count) {
+    uint32_t curr_time_ms = Timer_ReadCounter();
+    if (timer_count >= curr_time_ms) return (timer_count - curr_time_ms);
+    // Handle counter rollover
+    return (timer_count + (Timer_ReadPeriod() - curr_time_ms));
+}
+
+// Cooling timer
+#define MAX_COOLING_TIME_MS     5000
+uint32_t timer_cooling = MAX_COOLING_TIME_MS;
+
 // RTD resistor divider
 #define V_S         5.0       // 5V
 #define R_TOP       1000.0    // RTD, 1kOhm at 0C
@@ -20,6 +37,7 @@
 #define OHM_PER_C   3.85      // RTD ohms per degree C
 #define RTD_OFFSET  47.0
 
+// Convert RTD voltage to temp (units C)
 float rtd_volt_to_temp(float voltage) {
     return (V_S * R_BOT - voltage * (R_TOP + R_BOT)) / (voltage * OHM_PER_C) + RTD_OFFSET;
 }
@@ -28,7 +46,14 @@ float rtd_volt_to_temp(float voltage) {
 #define TARGET_TEMP         34   // selected empirically
 #define MIN_HEATER_DUTY     147  // takes ~5min before it's "too hot"
 
+// Fast heat up and then keep steady
 void heater_controller(float temp) {
+    // Make sure peltier cooling is off
+    if (PIN_P_COOL_Read()) {
+        PIN_P_COOL_Write(0);
+        CyDelay(5); // max relay switching time
+    }
+
     if (temp < TARGET_TEMP) {
         PWM_HEATER_WriteCompare(UINT8_MAX);
         char buf[64];
@@ -39,6 +64,27 @@ void heater_controller(float temp) {
         char buf[64];
         sprintf(buf, "min duty\n");
         UART_PC_PutString(buf);
+    }
+
+    timer_cooling = stopwatch_start();  // reset cooling timer
+}
+
+// Cools for a set duration
+void cooling_controller() {
+    // Make sure heater is off
+    if (PWM_HEATER_ReadCompare()) {
+        PWM_HEATER_WriteCompare(0);
+        CyDelay(1);
+    }
+
+    // Cool only for a set duration
+    if (stopwatch_elapsed_ms(timer_cooling) < MAX_COOLING_TIME_MS) {
+        PIN_P_COOL_Write(1);
+        char buf[64];
+        sprintf(buf, "COOLING\n");
+        UART_PC_PutString(buf);
+    } else {
+        PIN_P_COOL_Write(0);
     }
 }
 
@@ -63,6 +109,8 @@ int main(void)
     CapSense_CSD_InitializeAllBaselines();
     uint8_t is_touched = 0;
 
+    Timer_Start();
+
     for(;;) {
 
         // Read RTD temp
@@ -85,7 +133,7 @@ int main(void)
         }
 
         if (is_touched) heater_controller(temp_copper);
-        else PWM_HEATER_WriteCompare(0);
+        else cooling_controller();
     }
 }
 
