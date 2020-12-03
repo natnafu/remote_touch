@@ -24,6 +24,24 @@ float rtd_volt_to_temp(float voltage) {
     return (V_S * R_BOT - voltage * (R_TOP + R_BOT)) / (voltage * OHM_PER_C) + RTD_OFFSET;
 }
 
+// Heater controller
+#define TARGET_TEMP         34   // selected empirically
+#define MIN_HEATER_DUTY     147  // takes ~5min before it's "too hot"
+
+void heater_controller(float temp) {
+    if (temp < TARGET_TEMP) {
+        PWM_HEATER_WriteCompare(UINT8_MAX);
+        char buf[64];
+        sprintf(buf, "MAX duty\n");
+        UART_PC_PutString(buf);
+    } else {
+        PWM_HEATER_WriteCompare(MIN_HEATER_DUTY);
+        char buf[64];
+        sprintf(buf, "min duty\n");
+        UART_PC_PutString(buf);
+    }
+}
+
 int main(void)
 {
     CyGlobalIntEnable;
@@ -50,6 +68,7 @@ int main(void)
         char buf[64];
         sprintf(buf, "RTD %.2f\n", temp_copper);
         UART_PC_PutString(buf);
+        CyDelay(500);
     }
 }
 
