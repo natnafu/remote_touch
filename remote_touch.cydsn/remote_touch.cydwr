@@ -259,6 +259,7 @@
       <Data key="16217ef9-ca05-4fe1-bfd0-d31f25ca3321/232398c5-3876-4e07-8f5b-7cd7657055e2" value="CapSense_CSD_CmodCH0" />
       <Data key="16217ef9-ca05-4fe1-bfd0-d31f25ca3321/dd9c1af8-be5a-4b9e-b10c-b2d9f11dc9fc" value="CapSense_CSD_PortCH0" />
       <Data key="1425177d-0d0e-4468-8bcc-e638e5509a9b" value="PC_TX" />
+      <Data key="69725192-7a53-4de2-9cd3-f6af8df2bf73" value="PIN_REMOTE_TOUCH" />
       <Data key="77715107-f8d5-47e5-a629-0fb83101ac6b" value="PIN_NTC0" />
       <Data key="aa9cea79-c40c-4cea-9b88-a04a4ece84e6" value="PIN_P_HEAT" />
       <Data key="e851a3b9-efb8-48be-bbb8-b303b216c393" value="PIN_P_COOL" />
@@ -3387,6 +3388,11 @@
     <Group key="1425177d-0d0e-4468-8bcc-e638e5509a9b">
       <Group key="0">
         <Data key="Port Format" value="1,6" />
+      </Group>
+    </Group>
+    <Group key="69725192-7a53-4de2-9cd3-f6af8df2bf73">
+      <Group key="0">
+        <Data key="Port Format" value="2,2" />
       </Group>
     </Group>
     <Group key="77715107-f8d5-47e5-a629-0fb83101ac6b">
