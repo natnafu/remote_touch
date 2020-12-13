@@ -1,14 +1,3 @@
-/* ========================================
- *
- * Copyright Nafu Studios, 2020
- * All Rights Reserved
- * UNPUBLISHED, LICENSED SOFTWARE.
- *
- * CONFIDENTIAL AND PROPRIETARY INFORMATION
- * WHICH IS THE PROPERTY OF NAFU STUDIOS.
- *
- * ========================================
-*/
 #include <stdio.h>
 
 #include "project.h"
