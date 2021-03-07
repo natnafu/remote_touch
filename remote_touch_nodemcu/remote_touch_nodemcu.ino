@@ -4,9 +4,18 @@
 
 #include "secret.h"  // add to .gitignore, holds BLYNK tokens
 
-#define LED_ESP           D4   // LED near ESP module
-#define PIN_TOUCH         D0   // local touch state (from PSoC)
-#define PIN_REMOTE_TOUCH  D10  // remote touch state
+// Pins
+#define LED_ESP           D4     // LED near ESP module
+#define PIN_TOUCH         D0     // local touch state (from PSoC)
+#define PIN_REMOTE_TOUCH  V1     // remote touch state (from remote)
+#define PIN_HEATER        D10    // signals PSoC to heat
+// Time
+#define UPDATE_RATE       100    // local state update rate, units ms
+#define HEATER_TIMEOUT    30000  // heater timeout, units ms
+
+uint8_t local_state;         // local touch state
+uint32_t timer_check_local;  // local update timer
+uint32_t remote_state;       // remote state (doubles as time since touch)
 
 WidgetBridge esp_bridge(V0);
 Ticker ticker;
@@ -48,14 +57,13 @@ BLYNK_CONNECTED() {
   esp_bridge.setAuthToken(REMOTE_TOKEN);
 }
 
-// Transmits touch state of local to remote
-void check_touch() {
-  static uint8_t state = digitalRead(PIN_TOUCH);
-
-  if (!state != !digitalRead(PIN_TOUCH)) {
-    state = !state;
-    esp_bridge.digitalWrite(PIN_REMOTE_TOUCH, state);
-  }
+// Responds to remote touch state
+BLYNK_WRITE(PIN_REMOTE_TOUCH)
+{
+  if (param.asInt()) remote_state = millis();
+  else remote_state = 0;
+  digitalWrite(PIN_HEATER, remote_state);
+  digitalWrite(LED_ESP, !remote_state);
 }
 
 void setup() {
@@ -74,13 +82,30 @@ void setup() {
   ticker.detach();
   digitalWrite(LED_ESP, HIGH);
 
-  // Check touch state every 100ms
-  ticker.attach(0.1, check_touch);
+  timer_check_local = millis();
+  local_state = digitalRead(PIN_TOUCH);  // initial local state
+  Blynk.syncVirtual(PIN_REMOTE_TOUCH);   // initial remote state
 }
 
 void loop() {
-  // Update LED based on remote pin state
-  digitalWrite(LED_ESP, digitalRead(PIN_REMOTE_TOUCH));
+
+  // Check local state
+  if (millis() - timer_check_local >= UPDATE_RATE) {
+    // Check for local touch state change
+    if (!local_state != !digitalRead(PIN_TOUCH)) {
+      local_state = !local_state;
+      esp_bridge.virtualWrite(PIN_REMOTE_TOUCH, local_state);
+    }
+
+    // Reset timer
+    timer_check_local = millis();
+  }
+
+  // Check for heater timeout
+  if (remote_state && (millis() - remote_state >= HEATER_TIMEOUT)) {
+    digitalWrite(PIN_HEATER, 0);
+    digitalWrite(LED_ESP, 0);
+  }
 
   Blynk.run();
 }
