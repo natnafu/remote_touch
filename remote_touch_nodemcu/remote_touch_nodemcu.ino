@@ -1,3 +1,4 @@
+#include <Adafruit_NeoPixel.h>
 #include <BlynkSimpleEsp8266.h>
 #include <Ticker.h>
 #include <WiFiManager.h>
@@ -9,9 +10,14 @@
 #define PIN_TOUCH         D0     // local touch state (from PSoC)
 #define PIN_REMOTE_TOUCH  V1     // remote touch state (from remote)
 #define PIN_HEATER        D10    // signals PSoC to heat
+#define PIN_RGB_LED       D2     // WS2812b data pin
 // Time
 #define UPDATE_RATE       100    // local state update rate, units ms
 #define HEATER_TIMEOUT    30000  // heater timeout, units ms
+
+#define NUM_LEDS          1
+Adafruit_NeoPixel rgd_leds = Adafruit_NeoPixel(NUM_LEDS, PIN_RGB_LED, NEO_GRB + NEO_KHZ800);
+
 
 uint8_t local_state;         // local touch state
 uint32_t timer_check_local;  // local update timer
@@ -64,6 +70,19 @@ BLYNK_WRITE(PIN_REMOTE_TOUCH)
   else remote_state = 0;
   digitalWrite(PIN_HEATER, remote_state);
   digitalWrite(LED_ESP, !remote_state);
+  update_rgb_leds();
+}
+
+void update_rgb_leds() {
+  uint8_t red = 0;
+  uint8_t blu = 0;
+  if (remote_state) red = 255;
+  if (local_state)  blu = 255;
+
+  for (uint8_t i = 0; i < NUM_LEDS; i++) {
+    rgd_leds.setPixelColor(i, rgd_leds.Color(red,0,blu));
+  }
+  rgd_leds.show();
 }
 
 void setup() {
@@ -72,6 +91,8 @@ void setup() {
 
   pinMode(PIN_REMOTE_TOUCH, OUTPUT);
   pinMode(PIN_TOUCH, INPUT_PULLUP);
+
+  pinMode(PIN_RGB_LED, OUTPUT);
 
   // blink ESP LED until connection is made
   ticker.attach(0.5, toggle_led);
@@ -85,6 +106,9 @@ void setup() {
   timer_check_local = millis();
   local_state = digitalRead(PIN_TOUCH);  // initial local state
   Blynk.syncVirtual(PIN_REMOTE_TOUCH);   // initial remote state
+
+  rgd_leds.begin();
+  rgd_leds.show();
 }
 
 void loop() {
@@ -95,6 +119,7 @@ void loop() {
     if (!local_state != !digitalRead(PIN_TOUCH)) {
       local_state = !local_state;
       esp_bridge.virtualWrite(PIN_REMOTE_TOUCH, local_state);
+      update_rgb_leds();
     }
 
     // Reset timer
