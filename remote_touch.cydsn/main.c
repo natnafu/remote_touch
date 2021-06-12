@@ -16,8 +16,9 @@ uint32_t stopwatch_elapsed_ms(uint32_t timer_count) {
 }
 
 // Cooling timer
-#define MAX_COOLING_TIME_MS     5000
+#define MAX_COOLING_TIME_MS     7000
 uint32_t timer_cooling = MAX_COOLING_TIME_MS;
+uint32_t timer_heating = 0;
 
 // RTD resistor divider
 #define V_S         5.0       // 5V
@@ -33,16 +34,29 @@ float rtd_volt_to_temp(float voltage) {
 }
 
 // Heater controller
-//#define TARGET_TEMP         34   // selected empirically, Frame 1
-#define TARGET_TEMP         30   // selected empirically, Frame 1
-#define MIN_HEATER_DUTY     147  // takes ~5min before it's "too hot"
+#define TARGET_TEMP         30    // selected empirically
+#define MIN_HEATER_DUTY     147   // takes ~5min before it's "too hot"
+
+#define RELAY_SW_TIME_MS    5     // max relay switching time
+#define RELAY_CLICK_FREQ    1000  // freq, in ms, of relay clicking
 
 // Fast heat up and then keep steady
 void heater_controller(float temp) {
-    // Make sure peltier cooling is off
-    if (PIN_P_COOL_Read()) {
+    // Make sure peltiers are inactive (relays set to same state)
+    if (!PIN_P_COOL_Read() != !PIN_P_HEAT_Read()) {
         PIN_P_COOL_Write(0);
-        CyDelay(5); // max relay switching time
+        PIN_P_HEAT_Write(0);
+        CyDelay(RELAY_SW_TIME_MS);
+    }
+
+    // Click peltier relays for audible signal if remote touch until local touch
+    if (!PIN_IS_TOUCHED_Read()) {
+        static uint32_t timer_click = 0;
+        if (stopwatch_elapsed_ms(timer_click) > RELAY_CLICK_FREQ) {
+            PIN_P_COOL_Write(!PIN_P_COOL_Read());
+            PIN_P_HEAT_Write(!PIN_P_HEAT_Read());
+            timer_click = stopwatch_start();
+        }
     }
 
     if (temp < TARGET_TEMP) {
@@ -66,6 +80,12 @@ void cooling_controller() {
     if (PWM_HEATER_ReadCompare()) {
         PWM_HEATER_WriteCompare(0);
         CyDelay(1);
+    }
+
+    // Make sure heater relay is off
+    if (PIN_P_HEAT_Read()) {
+        PIN_P_HEAT_Write(0);
+        CyDelay(RELAY_SW_TIME_MS);
     }
 
     // Cool only for a set duration

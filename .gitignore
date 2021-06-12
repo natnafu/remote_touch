@@ -1,4 +1,5 @@
 *.Nat*
+*.Termina*
 */codegentemp/*
 */Generated_Source/*
 */ARM_GCC*/*
