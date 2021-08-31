@@ -252,8 +252,9 @@
   <Group key="DWRInstGuidMapping">
     <Group key="Pin">
       <Data key="8d318d8b-cf7b-4b6b-b02c-ab1c5c49d0ba" value="PIN_LED" />
-      <Data key="15b4269a-d8f7-4dfe-a825-858ab79b6f9c" value="PIN_GPIO" />
+      <Data key="15b4269a-d8f7-4dfe-a825-858ab79b6f9c" value="PIN_IS_TOUCHED" />
       <Data key="33a911e5-2abd-45c9-809f-8b79654645a6" value="PIN_HEATER0" />
+      <Data key="34cfed22-c960-4363-8ecf-2f6fc0d15200" value="Pins" />
       <Data key="94c7959d-1616-4978-b138-c08ce93fd0e9" value="AIN_NTC1" />
       <Data key="144e4ff8-9178-484b-8ef6-b82e9a066244" value="PIN_HEATER1" />
       <Data key="16217ef9-ca05-4fe1-bfd0-d31f25ca3321/232398c5-3876-4e07-8f5b-7cd7657055e2" value="CapSense_CSD_CmodCH0" />
@@ -3363,6 +3364,14 @@
     <Group key="33a911e5-2abd-45c9-809f-8b79654645a6">
       <Group key="0">
         <Data key="Port Format" value="0,6" />
+      </Group>
+    </Group>
+    <Group key="34cfed22-c960-4363-8ecf-2f6fc0d15200">
+      <Group key="0">
+        <Data key="Port Format" value="12,0" />
+      </Group>
+      <Group key="1">
+        <Data key="Port Format" value="12,1" />
       </Group>
     </Group>
     <Group key="94c7959d-1616-4978-b138-c08ce93fd0e9">

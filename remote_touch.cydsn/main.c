@@ -2,6 +2,8 @@
 
 #include "project.h"
 
+#define EZTUNE
+
 // Get current Timer count
 uint32_t stopwatch_start(void) {
     return Timer_ReadCounter();
@@ -116,8 +118,12 @@ int main(void)
 
     // Initialize Touch Sensor
     CyDelay(2000);
+#ifdef EZTUNE
+    CapSense_CSD_TunerStart();
+#else
     CapSense_CSD_Start();
     CapSense_CSD_InitializeAllBaselines();
+#endif
     uint8_t is_touched = 0;
 
     Timer_Start();
@@ -135,6 +141,9 @@ int main(void)
         sprintf(buf, "RTD %.2f\n", temp_copper);
         UART_PC_PutString(buf);
 
+#ifdef EZTUNE
+            CapSense_CSD_TunerComm();
+#else
         // Read touch sensor
         if(0u == CapSense_CSD_IsBusy()) {
             CapSense_CSD_UpdateEnabledBaselines();
@@ -142,7 +151,7 @@ int main(void)
             is_touched = CapSense_CSD_CheckIsWidgetActive(CapSense_CSD_TOUCH0__BTN);
             PIN_IS_TOUCHED_Write(is_touched);
         }
-
+#endif
         if (PIN_REMOTE_TOUCH_Read()) heater_controller(temp_copper);
         else cooling_controller();
     }
