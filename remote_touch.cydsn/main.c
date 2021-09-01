@@ -2,7 +2,8 @@
 
 #include "project.h"
 
-#define EZTUNE
+// Uncomment to communicate with Tuner GUI
+//#define EZTUNE
 
 // Get current Timer count
 uint32_t stopwatch_start(void) {
@@ -20,15 +21,14 @@ uint32_t stopwatch_elapsed_ms(uint32_t timer_count) {
 // Cooling timer
 #define MAX_COOLING_TIME_MS     7000
 uint32_t timer_cooling = MAX_COOLING_TIME_MS;
-uint32_t timer_heating = 0;
 
 // RTD resistor divider
 #define V_S         5.0       // 5V
 #define R_TOP       1000.0    // RTD, 1kOhm at 0C
 #define R_BOT       10000.0   // descrete resistor
 #define OHM_PER_C   3.85      // RTD ohms per degree C
-//#define RTD_OFFSET  47.0      // Frame 1
-#define RTD_OFFSET  32.0      // Frame 2
+#define RTD_OFFSET  47.0      // Frame 1
+//#define RTD_OFFSET  32.0      // Frame 2
 
 // Convert RTD voltage to temp (units C)
 float rtd_volt_to_temp(float voltage) {
@@ -39,10 +39,11 @@ float rtd_volt_to_temp(float voltage) {
 #define TARGET_TEMP         30    // selected empirically
 #define MIN_HEATER_DUTY     147   // takes ~5min before it's "too hot"
 
+// Relay timings
 #define RELAY_SW_TIME_MS    5     // max relay switching time
 #define RELAY_CLICK_FREQ    1000  // freq, in ms, of relay clicking
 
-// Fast heat up and then keep steady
+// Controls heating (heats up fast and then keeps steady)
 void heater_controller(float temp) {
     // Make sure peltiers are inactive (relays set to same state)
     if (!PIN_P_COOL_Read() != !PIN_P_HEAT_Read()) {
@@ -51,7 +52,7 @@ void heater_controller(float temp) {
         CyDelay(RELAY_SW_TIME_MS);
     }
 
-    // Click peltier relays for audible signal if remote touch until local touch
+    // Click peltier relays for audible signal unless touched locally
     if (!PIN_IS_TOUCHED_Read()) {
         static uint32_t timer_click = 0;
         if (stopwatch_elapsed_ms(timer_click) > RELAY_CLICK_FREQ) {
@@ -76,7 +77,7 @@ void heater_controller(float temp) {
     timer_cooling = stopwatch_start();  // reset cooling timer
 }
 
-// Cools for a set duration
+// Control cooling (cools for a set duration)
 void cooling_controller() {
     // Make sure heater is off
     if (PWM_HEATER_ReadCompare()) {
@@ -90,7 +91,7 @@ void cooling_controller() {
         CyDelay(RELAY_SW_TIME_MS);
     }
 
-    // Cool only for a set duration
+    // Cool for a set duration to avoid overheating heatsink
     if (stopwatch_elapsed_ms(timer_cooling) < MAX_COOLING_TIME_MS) {
         PIN_P_COOL_Write(1);
         char buf[64];
@@ -123,8 +124,9 @@ int main(void)
 #else
     CapSense_CSD_Start();
     CapSense_CSD_InitializeAllBaselines();
-#endif
+    CapSense_CSD_InitializeAllBaselines();
     uint8_t is_touched = 0;
+#endif
 
     Timer_Start();
 
@@ -142,7 +144,7 @@ int main(void)
         UART_PC_PutString(buf);
 
 #ifdef EZTUNE
-            CapSense_CSD_TunerComm();
+        CapSense_CSD_TunerComm();
 #else
         // Read touch sensor
         if(0u == CapSense_CSD_IsBusy()) {
@@ -152,9 +154,8 @@ int main(void)
             PIN_IS_TOUCHED_Write(is_touched);
         }
 #endif
+        // Heat or cool depending on remote touch state
         if (PIN_REMOTE_TOUCH_Read()) heater_controller(temp_copper);
         else cooling_controller();
     }
 }
-
-/* [] END OF FILE */
