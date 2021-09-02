@@ -93,6 +93,7 @@ void setup() {
   pinMode(PIN_TOUCH, INPUT_PULLUP);
 
   pinMode(PIN_RGB_LED, OUTPUT);
+  pinMode(PIN_HEATER, OUTPUT);
 
   // blink ESP LED until connection is made
   ticker.attach(0.5, toggle_led);
