@@ -18,4 +18,5 @@
 */*.cywrk.*
 */*.cyprj.*
 */secret.h
+*/belonging/secret.h
 .DS_Store
