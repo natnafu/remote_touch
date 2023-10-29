@@ -33,7 +33,9 @@ uint32_t stopwatch_elapsed_ms(uint32_t timer_count) {
 }
 
 // Cooling timer
-#define MAX_COOLING_TIME_MS     60000
+#define MIN_COOLING_TIME_MS     10000  // minimum time spent cooling
+#define MAX_COOLING_TIME_MS     30000  // maximum allowed cooling time
+#define COOLING_TARGET_TEMP     20     // target cooling temperature
 uint32_t timer_cooling = MAX_COOLING_TIME_MS;
 
 // RTD resistor divider
@@ -88,7 +90,7 @@ void heater_controller(float temp) {
 }
 
 // Control cooling (cools for a set duration)
-void cooling_controller() {
+void cooling_controller(float temp) {
     // Make sure heater is off
     if (PWM_HEATER_ReadCompare()) {
         PWM_HEATER_WriteCompare(0);
@@ -101,12 +103,22 @@ void cooling_controller() {
         CyDelay(RELAY_SW_TIME_MS);
     }
 
-    // Cool for a set duration to avoid overheating heatsink
-    if (stopwatch_elapsed_ms(timer_cooling) < MAX_COOLING_TIME_MS) {
+    // Cooling behaviour
+    if (stopwatch_elapsed_ms(timer_cooling) < MIN_COOLING_TIME_MS) {
+        // cool for a minimum amount of time
+        state = STATE_COOL;
+        PIN_P_COOL_Write(1);
+    } else if (stopwatch_elapsed_ms(timer_cooling) > MAX_COOLING_TIME_MS) {
+        // stop cooling after a maximum amount of time
+        state = STATE_IDLE;
+        PIN_P_COOL_Write(0);
+    } else if (temp >= COOLING_TARGET_TEMP) {
+        // if between min/max cooling times, try to hit a target
         state = STATE_COOL;
         PIN_P_COOL_Write(1);
     } else {
         state = STATE_IDLE;
+        timer_cooling = MAX_COOLING_TIME_MS; // prevent cooling until next cycle
         PIN_P_COOL_Write(0);
     }
 }
@@ -160,7 +172,7 @@ int main(void)
 #endif
         // Heat or cool depending on remote touch state
         if (PIN_REMOTE_TOUCH_Read()) heater_controller(temp_copper);
-        else cooling_controller();
+        else cooling_controller(temp_copper);
 
         // print out status message
         char buf[64];
