@@ -43,8 +43,8 @@ uint32_t timer_cooling = MAX_COOLING_TIME_MS;
 #define R_TOP       1000.0    // RTD, 1kOhm at 0C
 #define R_BOT       10000.0   // descrete resistor
 #define OHM_PER_C   3.85      // RTD ohms per degree C
-#define RTD_OFFSET  47.0      // Frame Client
-//#define RTD_OFFSET  32.0      // Frame Server
+//#define RTD_OFFSET  47.0      // Frame Client
+#define RTD_OFFSET  10.0      // Frame Server
 
 // Convert RTD voltage to temp (units C)
 float rtd_volt_to_temp(float voltage) {
