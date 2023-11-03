@@ -42,6 +42,9 @@ WiFiServer server(80);
 #define STEP_SIZE_LED   (MAX_BRIGHTNESS / NUM_STEPS)
 Adafruit_NeoPixel rgb_leds = Adafruit_NeoPixel(NUM_LEDS, PIN_RGB_STRIP, NEO_RGB + NEO_KHZ800);
 
+#define DATA_TIMEOUT_MS  1000
+Ticker ticker;
+
 void rgb_strip_handler() {
   static int r = 0;
   static int g = 0;
@@ -60,8 +63,6 @@ void rgb_strip_handler() {
   }
 }
 
-Ticker ticker;
-
 // Toggles LED on ESP module
 void toggle_esp_led() {
   digitalWrite(PIN_LED_ESP, !digitalRead(PIN_LED_ESP));
@@ -77,7 +78,7 @@ void set_rgb_strip(uint8_t r, uint8_t g, uint8_t b) {
 void setup_wifi() {
   WiFi.config(local_IP, gateway, subnet);
 
-  ticker.attach(0.1, toggle_esp_led);
+  ticker.attach(0.5, toggle_esp_led);
 
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
@@ -117,15 +118,23 @@ void send_local_touch_state() {
 }
 
 void remote_touch_handler() {
+  static uint32_t data_timer = millis();
+  if (millis() - data_timer > DATA_TIMEOUT_MS) {
+      // If connection is lost, turn off heating and flash the ESP LED
+      if (!ticker.active()) ticker.attach(0.1, toggle_esp_led);
+      digitalWrite(PIN_REMOTE_TOUCHED, LOW);
+  }
 #if IS_SERVER
   client = server.available();
   if(!client) return;
 #endif
   if (client.connected()) {
     if (client.available()) {
-      int receivedData = client.read();
+      // reset timeout timer, stop flashing ESP LED
+      data_timer = millis();
+      if (ticker.active()) ticker.detach();
 
-      if (receivedData == 0) {
+      if (client.read() == 0) {
         digitalWrite(PIN_LED_ESP, LOW);
         digitalWrite(PIN_REMOTE_TOUCHED, LOW);
       } else {
