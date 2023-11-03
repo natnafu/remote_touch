@@ -18,8 +18,8 @@
 // WiFi ~~~~
 #define IS_SERVER true  // Change to false on the receiver board
 
-const char* ssid = WIFI_SSID;
-const char* password = WIFI_PASS;
+const char* ssid = WIFI_SSID;            // defined in secret.h
+const char* password = WIFI_PASS;        // defined in secret.h
 const char* serverIP = "192.168.1.101";  // IP address of the server ESP8266
 
 #if IS_SERVER
