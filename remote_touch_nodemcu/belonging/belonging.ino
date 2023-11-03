@@ -104,13 +104,11 @@ void setup() {
 
   setup_wifi();
 
-  if (IS_SERVER) {
-    // Set up the server
-    server.begin();
-  } else {
-    // Set up the client to connect to the server
-    client.connect(serverIP, 80);
-  }
+#if IS_SERVER
+    server.begin();  // Set up the server
+#else
+    client.connect(serverIP, 80);  // Set up the client to connect to the server
+#endif
 }
 
 void send_local_touch_state() {
