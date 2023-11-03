@@ -42,6 +42,7 @@ WiFiServer server(80);
 #define STEP_SIZE_LED   (MAX_BRIGHTNESS / NUM_STEPS)
 Adafruit_NeoPixel rgb_leds = Adafruit_NeoPixel(NUM_LEDS, PIN_RGB_STRIP, NEO_RGB + NEO_KHZ800);
 
+#define SEND_FREQ_MS     10
 #define DATA_TIMEOUT_MS  1000
 Ticker ticker;
 
@@ -112,7 +113,13 @@ void setup() {
 }
 
 void send_local_touch_state() {
-  if (client.connected()) client.write(digitalRead(PIN_IS_TOUCHED));
+  static uint32_t send_timer = millis();
+  if (millis() - send_timer > SEND_FREQ_MS) {
+    if (client.connected()) {
+      client.write(digitalRead(PIN_IS_TOUCHED));
+      send_timer = millis();
+    }
+  }
 }
 
 void remote_touch_handler() {
