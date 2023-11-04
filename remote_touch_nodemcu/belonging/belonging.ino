@@ -34,8 +34,8 @@ WiFiClient client;
 WiFiServer server(80);
 
 // LEDs ~~~~
-#define NUM_LEDS        42
-#define MAX_BRIGHTNESS  100
+#define NUM_LEDS        43
+#define MAX_BRIGHTNESS  255
 #define CHANGE_TIME_MS  2000
 #define NUM_STEPS       100
 #define STEP_SIZE_MS    (CHANGE_TIME_MS / NUM_STEPS)
