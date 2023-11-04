@@ -130,6 +130,10 @@ int main(void)
     // Copper heater
     PWM_HEATER_Start();
 
+    // Fan speed control
+    PWM_FAN_DUTY_Start();
+    PWM_FAN_DUTY_WriteCompare(255);
+
     // Copper temperature sensor
     ADC_TEMP_Start();
     ADC_TEMP_StartConvert();

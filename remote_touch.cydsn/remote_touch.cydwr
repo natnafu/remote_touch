@@ -257,6 +257,7 @@
       <Data key="34cfed22-c960-4363-8ecf-2f6fc0d15200" value="Pins" />
       <Data key="94c7959d-1616-4978-b138-c08ce93fd0e9" value="AIN_NTC1" />
       <Data key="144e4ff8-9178-484b-8ef6-b82e9a066244" value="PIN_HEATER1" />
+      <Data key="0737d67a-0108-494b-93a6-740cd5c853dc" value="PIN_FAN_SPEED" />
       <Data key="16217ef9-ca05-4fe1-bfd0-d31f25ca3321/232398c5-3876-4e07-8f5b-7cd7657055e2" value="CapSense_CSD_CmodCH0" />
       <Data key="16217ef9-ca05-4fe1-bfd0-d31f25ca3321/dd9c1af8-be5a-4b9e-b10c-b2d9f11dc9fc" value="CapSense_CSD_PortCH0" />
       <Data key="1425177d-0d0e-4468-8bcc-e638e5509a9b" value="PC_TX" />
@@ -3382,6 +3383,11 @@
     <Group key="144e4ff8-9178-484b-8ef6-b82e9a066244">
       <Group key="0">
         <Data key="Port Format" value="0,7" />
+      </Group>
+    </Group>
+    <Group key="0737d67a-0108-494b-93a6-740cd5c853dc">
+      <Group key="0">
+        <Data key="Port Format" value="3,0" />
       </Group>
     </Group>
     <Group key="16217ef9-ca05-4fe1-bfd0-d31f25ca3321/232398c5-3876-4e07-8f5b-7cd7657055e2">
