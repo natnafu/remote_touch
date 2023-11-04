@@ -71,14 +71,14 @@ void heater_controller(float temp) {
     }
 
     // Click peltier relays for audible signal unless touched locally
-    if (!PIN_IS_TOUCHED_Read()) {
-        static uint32_t timer_click = 0;
-        if (stopwatch_elapsed_ms(timer_click) > RELAY_CLICK_FREQ) {
-            PIN_P_COOL_Write(!PIN_P_COOL_Read());
-            PIN_P_HEAT_Write(!PIN_P_HEAT_Read());
-            timer_click = stopwatch_start();
-        }
-    }
+//    if (!PIN_IS_TOUCHED_Read()) {
+//        static uint32_t timer_click = 0;
+//        if (stopwatch_elapsed_ms(timer_click) > RELAY_CLICK_FREQ) {
+//            PIN_P_COOL_Write(!PIN_P_COOL_Read());
+//            PIN_P_HEAT_Write(!PIN_P_HEAT_Read());
+//            timer_click = stopwatch_start();
+//        }
+//    }
 
     if (temp < TARGET_TEMP) {
         PWM_HEATER_WriteCompare(UINT8_MAX);
