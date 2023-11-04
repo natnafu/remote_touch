@@ -5,6 +5,17 @@
 // Uncomment to communicate with Tuner GUI
 //#define EZTUNE
 
+// Comment to set to Client
+//#define IS_SERVER
+
+#ifdef IS_SERVER
+    #define RTD_OFFSET  10.0
+    #define MIN_HEATER_DUTY     100
+#else
+    #define RTD_OFFSET  47.0
+    #define MIN_HEATER_DUTY     147
+#endif
+
 // for status messages
 #define STATE_IDLE  0
 #define STATE_HEAT  1
@@ -43,8 +54,6 @@ uint32_t timer_cooling = MAX_COOLING_TIME_MS;
 #define R_TOP       1000.0    // RTD, 1kOhm at 0C
 #define R_BOT       10000.0   // descrete resistor
 #define OHM_PER_C   3.85      // RTD ohms per degree C
-//#define RTD_OFFSET  47.0      // Frame Client
-#define RTD_OFFSET  10.0      // Frame Server
 
 // Convert RTD voltage to temp (units C)
 float rtd_volt_to_temp(float voltage) {
@@ -53,7 +62,6 @@ float rtd_volt_to_temp(float voltage) {
 
 // Heater controller
 #define TARGET_TEMP         25    // selected empirically
-#define MIN_HEATER_DUTY     100   // need to make sure it doesn't get too hot
 
 // Relay timings
 #define RELAY_SW_TIME_MS    5     // max relay switching time
