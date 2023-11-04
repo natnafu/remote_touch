@@ -52,8 +52,8 @@ float rtd_volt_to_temp(float voltage) {
 }
 
 // Heater controller
-#define TARGET_TEMP         30    // selected empirically
-#define MIN_HEATER_DUTY     147   // takes ~5min before it's "too hot"
+#define TARGET_TEMP         25    // selected empirically
+#define MIN_HEATER_DUTY     100   // need to make sure it doesn't get too hot
 
 // Relay timings
 #define RELAY_SW_TIME_MS    5     // max relay switching time
