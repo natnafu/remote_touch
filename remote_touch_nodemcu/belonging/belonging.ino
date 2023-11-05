@@ -43,7 +43,7 @@ WiFiServer server(80);
 Adafruit_NeoPixel rgb_leds = Adafruit_NeoPixel(NUM_LEDS, PIN_RGB_STRIP, NEO_RGB + NEO_KHZ800);
 
 #define SEND_FREQ_MS     10
-#define DATA_TIMEOUT_MS  1000
+#define DATA_TIMEOUT_MS  5000
 Ticker ticker;
 
 void rgb_strip_handler() {
@@ -87,6 +87,9 @@ void setup_wifi() {
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
   }
+
+  WiFi.setAutoReconnect(true);
+  WiFi.persistent(true);
 
   ticker.detach();
   digitalWrite(PIN_LED_ESP, HIGH);
